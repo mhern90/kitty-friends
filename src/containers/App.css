@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'Gravitas One';
+    font-style : normal;
+    font-weight: normal;
+    src: local('Gravitas One'), url('GravitasOne.ttf') format('truetype');
+}
+
+h1 {
+    font-family: 'Gravitas One'; 
+    color: #e60042;
+}
