@@ -1,43 +1,51 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
+import ErrorBoundry from '../components/ErrorBoundry';
 import './App.css';
 
+import { setSearchField, requestKitties } from '../actions'
+
+const mapStateToProps = state => {
+    return {
+        searchField: state.searchKitties.searchField,
+        kitties : state.requestKitties.kitties,
+        isPending: state.requestKitties.isPending,
+        error: state.requestKitties.error
+    }
+}
+
+const mapDisapatchToProps = (dispatch) => {
+    return {
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+        onRequestKitties: () => dispatch(requestKitties()) 
+    }
+}
+
 class App extends Component {
-    constructor() {
-        super()
-        this.state = {
-            cats: [],
-            searchfield: ''
-        }
-    }
-
     componentDidMount() {
-        fetch('https://jsonplaceholder.typicode.com/users')
-            .then(response => response.json())
-            .then(users => this.setState({ cats: users }));
-    }
-
-    onSearchChange = (event) => {
-        this.setState({ searchfield: event.target.value})
+        this.props.onRequestKitties()
     }
 
     render() {
-        const { cats, searchfield } = this.state;
-        const filteredCats = cats.filter(cat => {
-            return cat.name.toLowerCase().includes(searchfield.toLowerCase());
+        const { searchField, onSearchChange, kitties, isPending} = this.props;
+        const filteredCats = kitties.filter(cat => {
+            return cat.name.toLowerCase().includes(searchField.toLowerCase());
         });
 
-        if (!cats.length) {
+        if (isPending) {
             return <h1>Loading</h1>
         } else {
             return (
                 <div className='tc'>
                     <h1>KittyFriends</h1>
-                    <SearchBox searchChange={this.onSearchChange} />
+                    <SearchBox searchChange={onSearchChange} />
                     <Scroll>
-                        <CardList cats={filteredCats} />
+                        <ErrorBoundry>
+                            <CardList cats={filteredCats} />
+                        </ErrorBoundry>
                     </Scroll>
                 </div>
             );
@@ -45,4 +53,4 @@ class App extends Component {
     }
 }
 
-export default App;
+export default connect(mapStateToProps, mapDisapatchToProps)(App);
